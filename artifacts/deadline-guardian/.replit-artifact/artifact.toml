@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Deadline Guardian"
+version = "1.0.0"
+id = "artifacts/deadline-guardian"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19028
+
+[services.development]
+run = "pnpm --filter @workspace/deadline-guardian run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/deadline-guardian", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/deadline-guardian/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19028"
+BASE_PATH = "/"

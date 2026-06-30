@@ -5,7 +5,9 @@
  * Deadline Guardian API
  * OpenAPI spec version: 0.1.0
  */
+import type { ChatMessageRole } from './chatMessageRole';
 
-export interface HealthStatus {
-  status: string;
+export interface ChatMessage {
+  role: ChatMessageRole;
+  content: string;
 }

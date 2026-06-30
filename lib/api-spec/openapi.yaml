@@ -3,20 +3,37 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Deadline Guardian API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User profile operations
+  - name: tasks
+    description: Task management
+  - name: categories
+    description: Task categories
+  - name: subtasks
+    description: Task subtasks
+  - name: dashboard
+    description: Dashboard aggregates
+  - name: analytics
+    description: Productivity analytics
+  - name: ai
+    description: AI-powered features
+  - name: notifications
+    description: Notification management
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +41,1402 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── AUTH ────────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/change-password:
+    post:
+      operationId: changePassword
+      tags: [auth]
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePasswordInput"
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "400":
+          description: Invalid current password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── USERS ────────────────────────────────────────────────────────────────────
+  /users/me:
+    patch:
+      operationId: updateProfile
+      tags: [users]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/me/avatar:
+    post:
+      operationId: updateAvatar
+      tags: [users]
+      summary: Update profile picture URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AvatarUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ── CATEGORIES ──────────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List categories
+      responses:
+        "200":
+          description: Categories list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    get:
+      operationId: getCategory
+      tags: [categories]
+      summary: Get category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── TASKS ───────────────────────────────────────────────────────────────────
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks with optional filtering
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tasks list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskPatch"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /tasks/{id}/complete:
+    post:
+      operationId: completeTask
+      tags: [tasks]
+      summary: Mark task as complete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  # ── SUBTASKS ─────────────────────────────────────────────────────────────────
+  /tasks/{taskId}/subtasks:
+    get:
+      operationId: listSubtasks
+      tags: [subtasks]
+      summary: List subtasks for a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Subtasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subtask"
+    post:
+      operationId: createSubtask
+      tags: [subtasks]
+      summary: Create subtask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubtaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subtask"
+
+  /tasks/{taskId}/subtasks/{id}:
+    patch:
+      operationId: updateSubtask
+      tags: [subtasks]
+      summary: Update a subtask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubtaskPatch"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subtask"
+    delete:
+      operationId: deleteSubtask
+      tags: [subtasks]
+      summary: Delete a subtask
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ── NOTIFICATIONS ────────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List notifications
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+
+  /notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark all notifications as read
+      responses:
+        "200":
+          description: All marked read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ── DASHBOARD ────────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/today:
+    get:
+      operationId: getTodayTasks
+      tags: [dashboard]
+      summary: Get today's tasks and schedule
+      responses:
+        "200":
+          description: Today tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  /dashboard/upcoming:
+    get:
+      operationId: getUpcomingDeadlines
+      tags: [dashboard]
+      summary: Get upcoming deadlines in next 7 days
+      responses:
+        "200":
+          description: Upcoming deadlines
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  /dashboard/overdue:
+    get:
+      operationId: getOverdueTasks
+      tags: [dashboard]
+      summary: Get overdue tasks
+      responses:
+        "200":
+          description: Overdue tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  # ── ANALYTICS ───────────────────────────────────────────────────────────────
+  /analytics/productivity:
+    get:
+      operationId: getProductivityStats
+      tags: [analytics]
+      summary: Get productivity stats
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+      responses:
+        "200":
+          description: Productivity stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductivityStats"
+
+  /analytics/weekly-progress:
+    get:
+      operationId: getWeeklyProgress
+      tags: [analytics]
+      summary: Get weekly progress chart data
+      responses:
+        "200":
+          description: Weekly progress
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DayProgress"
+
+  /analytics/category-breakdown:
+    get:
+      operationId: getCategoryBreakdown
+      tags: [analytics]
+      summary: Get task breakdown by category
+      responses:
+        "200":
+          description: Category breakdown
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryBreakdown"
+
+  # ── AI FEATURES ──────────────────────────────────────────────────────────────
+  /ai/prioritize:
+    post:
+      operationId: aiPrioritizeTasks
+      tags: [ai]
+      summary: AI smart priority ranking for tasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiPrioritizeInput"
+      responses:
+        "200":
+          description: Prioritized tasks with explanations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiPrioritizedTask"
+
+  /ai/daily-plan:
+    post:
+      operationId: aiGenerateDailyPlan
+      tags: [ai]
+      summary: Generate optimized daily schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiDailyPlanInput"
+      responses:
+        "200":
+          description: Daily plan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiScheduleBlock"
+
+  /ai/risk:
+    get:
+      operationId: aiDeadlineRisk
+      tags: [ai]
+      summary: AI deadline risk prediction for all active tasks
+      responses:
+        "200":
+          description: Risk predictions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiRiskAssessment"
+
+  /ai/suggestions:
+    get:
+      operationId: aiGetSuggestions
+      tags: [ai]
+      summary: Get AI productivity suggestions
+      responses:
+        "200":
+          description: AI suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AiSuggestion"
+
+  /ai/parse-task:
+    post:
+      operationId: aiParseNaturalLanguageTask
+      tags: [ai]
+      summary: Parse natural language input into task fields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NaturalLanguageInput"
+      responses:
+        "200":
+          description: Parsed task data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParsedTaskResult"
+
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      summary: Chat with the AI productivity assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatInput"
+      responses:
+        "200":
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiChatReply"
+
+  /ai/pomodoro-start:
+    post:
+      operationId: aiStartPomodoro
+      tags: [ai]
+      summary: Start a pomodoro session for a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PomodoroInput"
+      responses:
+        "200":
+          description: Pomodoro session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PomodoroSession"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]
+
+    # ── AUTH ──────────────────────────────────────────────────────────────────
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        timeZone:
+          type: string
+        dailyWorkingHours:
+          type: number
+        preferredWorkingTime:
+          type: string
+          enum: [morning, afternoon, night]
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    ChangePasswordInput:
+      type: object
+      required: [currentPassword, newPassword]
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+          minLength: 8
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    # ── USER ──────────────────────────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, name, email, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        profilePicture:
+          type: ["string", "null"]
+        timeZone:
+          type: ["string", "null"]
+        dailyWorkingHours:
+          type: ["number", "null"]
+        preferredWorkingTime:
+          type: ["string", "null"]
+        theme:
+          type: ["string", "null"]
+        notificationsEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        timeZone:
+          type: string
+        dailyWorkingHours:
+          type: number
+        preferredWorkingTime:
+          type: string
+          enum: [morning, afternoon, night]
+        theme:
+          type: string
+          enum: [light, dark, system]
+        notificationsEnabled:
+          type: boolean
+
+    AvatarUpdate:
+      type: object
+      required: [profilePicture]
+      properties:
+        profilePicture:
+          type: string
+
+    # ── CATEGORY ──────────────────────────────────────────────────────────────
+    Category:
+      type: object
+      required: [id, name, color, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        color:
+          type: string
+        icon:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    CategoryInput:
+      type: object
+      required: [name, color]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        color:
+          type: string
+        icon:
+          type: string
+
+    CategoryPatch:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+
+    # ── TASK ─────────────────────────────────────────────────────────────────
+    Task:
+      type: object
+      required: [id, title, status, priority, deadline, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        deadline:
+          type: string
+          format: date
+        dueTime:
+          type: ["string", "null"]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        estimatedHours:
+          type: ["number", "null"]
+        categoryId:
+          type: ["integer", "null"]
+        category:
+          $ref: "#/components/schemas/Category"
+        tags:
+          type: array
+          items:
+            type: string
+        repeatOption:
+          type: ["string", "null"]
+          enum: [daily, weekly, monthly, "null"]
+        notes:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, missed]
+        aiPriority:
+          type: ["string", "null"]
+          enum: [high, medium, low, "null"]
+        aiPriorityReason:
+          type: ["string", "null"]
+        riskLevel:
+          type: ["string", "null"]
+          enum: [low, medium, high, "null"]
+        riskReason:
+          type: ["string", "null"]
+        subtasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subtask"
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    TaskInput:
+      type: object
+      required: [title, deadline, priority]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date
+        dueTime:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        estimatedHours:
+          type: number
+        categoryId:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        repeatOption:
+          type: string
+          enum: [daily, weekly, monthly]
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed, missed]
+
+    TaskPatch:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date
+        dueTime:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        estimatedHours:
+          type: number
+        categoryId:
+          type: ["integer", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+        repeatOption:
+          type: ["string", "null"]
+          enum: [daily, weekly, monthly, "null"]
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed, missed]
+
+    # ── SUBTASK ──────────────────────────────────────────────────────────────
+    Subtask:
+      type: object
+      required: [id, taskId, title, completed, createdAt]
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: integer
+        title:
+          type: string
+        completed:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    SubtaskInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+
+    SubtaskPatch:
+      type: object
+      properties:
+        title:
+          type: string
+        completed:
+          type: boolean
+
+    # ── NOTIFICATION ─────────────────────────────────────────────────────────
+    Notification:
+      type: object
+      required: [id, type, message, read, createdAt]
+      properties:
+        id:
+          type: integer
+        taskId:
+          type: ["integer", "null"]
+        type:
+          type: string
+          enum: [deadline_reminder, overdue_alert, ai_suggestion, system]
+        message:
+          type: string
+        read:
+          type: boolean
+        scheduledAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    # ── DASHBOARD ────────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      required: [totalTasks, completedToday, pendingTasks, overdueTasks, completionRate, productivityScore, streak]
+      properties:
+        totalTasks:
+          type: integer
+        completedToday:
+          type: integer
+        pendingTasks:
+          type: integer
+        overdueTasks:
+          type: integer
+        inProgressTasks:
+          type: integer
+        completionRate:
+          type: number
+        productivityScore:
+          type: number
+        streak:
+          type: integer
+        hoursWorkedToday:
+          type: number
+        tasksCompletedThisWeek:
+          type: integer
+
+    # ── ANALYTICS ────────────────────────────────────────────────────────────
+    ProductivityStats:
+      type: object
+      required: [period, tasksCompleted, hoursWorked, missedDeadlines, completionRate, focusScore]
+      properties:
+        period:
+          type: string
+        tasksCompleted:
+          type: integer
+        hoursWorked:
+          type: number
+        missedDeadlines:
+          type: integer
+        completionRate:
+          type: number
+        focusScore:
+          type: number
+        avgTaskDuration:
+          type: number
+
+    DayProgress:
+      type: object
+      required: [date, day, completed, total]
+      properties:
+        date:
+          type: string
+        day:
+          type: string
+        completed:
+          type: integer
+        total:
+          type: integer
+        hoursWorked:
+          type: number
+
+    CategoryBreakdown:
+      type: object
+      required: [categoryId, name, color, count, completed]
+      properties:
+        categoryId:
+          type: ["integer", "null"]
+        name:
+          type: string
+        color:
+          type: string
+        count:
+          type: integer
+        completed:
+          type: integer
+
+    # ── AI ───────────────────────────────────────────────────────────────────
+    AiPrioritizeInput:
+      type: object
+      required: [taskIds]
+      properties:
+        taskIds:
+          type: array
+          items:
+            type: integer
+        availableHours:
+          type: number
+
+    AiPrioritizedTask:
+      type: object
+      required: [taskId, aiPriority, explanation, urgencyScore]
+      properties:
+        taskId:
+          type: integer
+        aiPriority:
+          type: string
+          enum: [high, medium, low]
+        explanation:
+          type: string
+        urgencyScore:
+          type: number
+        recommendedStartTime:
+          type: ["string", "null"]
+
+    AiDailyPlanInput:
+      type: object
+      required: [date, availableHours]
+      properties:
+        date:
+          type: string
+          format: date
+        availableHours:
+          type: number
+        breakDurationMinutes:
+          type: integer
+        startTime:
+          type: string
+
+    AiScheduleBlock:
+      type: object
+      required: [startTime, endTime, type, label]
+      properties:
+        startTime:
+          type: string
+        endTime:
+          type: string
+        type:
+          type: string
+          enum: [task, break, buffer]
+        label:
+          type: string
+        taskId:
+          type: ["integer", "null"]
+        notes:
+          type: ["string", "null"]
+
+    AiRiskAssessment:
+      type: object
+      required: [taskId, riskLevel, riskPercentage, explanation]
+      properties:
+        taskId:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [low, medium, high]
+        riskPercentage:
+          type: number
+        explanation:
+          type: string
+        hoursRemaining:
+          type: ["number", "null"]
+        hoursNeeded:
+          type: ["number", "null"]
+        actionRequired:
+          type: string
+
+    AiSuggestion:
+      type: object
+      required: [id, type, message, priority]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [break_task, start_now, reschedule, focus, start_early]
+        message:
+          type: string
+        priority:
+          type: string
+          enum: [high, medium, low]
+        taskId:
+          type: ["integer", "null"]
+        actionLabel:
+          type: ["string", "null"]
+
+    NaturalLanguageInput:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+
+    ParsedTaskResult:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        deadline:
+          type: ["string", "null"]
+          format: date
+        dueTime:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+          enum: [low, medium, high, urgent, "null"]
+        estimatedHours:
+          type: ["number", "null"]
+        tags:
+          type: array
+          items:
+            type: string
+
+    AiChatInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        conversationHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+
+    AiChatReply:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+        suggestedActions:
+          type: array
+          items:
+            type: string
+
+    PomodoroInput:
+      type: object
+      required: [taskId, workMinutes]
+      properties:
+        taskId:
+          type: integer
+        workMinutes:
+          type: integer
+        breakMinutes:
+          type: integer
+
+    PomodoroSession:
+      type: object
+      required: [sessionId, taskId, workMinutes, breakMinutes, startedAt]
+      properties:
+        sessionId:
+          type: string
+        taskId:
+          type: integer
+        workMinutes:
+          type: integer
+        breakMinutes:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time

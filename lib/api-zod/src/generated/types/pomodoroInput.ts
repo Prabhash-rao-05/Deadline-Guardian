@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface HealthStatus {
-  status: string;
+export interface PomodoroInput {
+  taskId: number;
+  workMinutes: number;
+  breakMinutes?: number;
 }
