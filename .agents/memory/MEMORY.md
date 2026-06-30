@@ -1,3 +1,0 @@
-- [Orval date format quirk](orval-date-quirk.md) — Orval codegen converts `format: date` fields to `Date` objects; must stringify before passing to Drizzle date columns with `mode: "string"`.
-- [Subtask ownership pattern](subtask-ownership.md) — Subtask PATCH/DELETE must join to parent task to verify userId; skipping this causes IDOR. Task DELETE must verify ownership before deleting subtasks.
-- [JWT secret mandatory startup](jwt-secret-startup.md) — SESSION_SECRET must be required at startup (throw if missing); never use a hardcoded fallback.
