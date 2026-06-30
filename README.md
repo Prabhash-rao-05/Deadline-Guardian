@@ -66,16 +66,6 @@ Deadline-Guardian/
 └── scripts/
 ```
 
----
-
-## 🚀 Live Demo
-
-Google Cloud Deployment
-
-> (Paste your Google Cloud URL here)
-
----
-
 ## 📸 Screenshots
 
 ### Dashboard
